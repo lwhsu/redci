@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+
+import json
+import subprocess
+import sys
+
+redci_config_json = open('.redci.json')
+redci_config = json.load(redci_config_json)
+
+#subprocess.call(["ls", "-al"])
+
+for p in redci_config['packages']:
+    cmd = ['pkg', '-c', '/usr/jails/jail1', 'install', '-y']
+    cmd.append(p)
+    r = subprocess.call(cmd)
+    if r != 0:
+        sys.exit(r)
+
+for p in redci_config['build']:
+    cmd = ['jexec', '-U', 'jenkins', 'jail1', '/bin/sh', '-c']
+    cmd.append('cd /home/jenkins && ' + p)
+    r = subprocess.call(cmd)
+    if r != 0:
+        sys.exit(r)
